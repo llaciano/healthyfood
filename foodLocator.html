@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset='utf-8' />
+  <title>Healthy food finder</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <!-- Import Mapbox GL JS -->
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.2.0/mapbox-gl-geocoder.min.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.2.0/mapbox-gl-geocoder.css' type='text/css' />
+
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.css' rel='stylesheet' />
+  <!-- Import jQuery -->
+  <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
+  <style>
+    body {
+        color: #404040;
+        font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      * {
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+      }
+
+      .sidebar {
+        position: absolute;
+        width: 20%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        border-right: 1px solid rgba(0, 0, 0, 0.25);
+      }
+
+      .pad2 {
+        padding: 20px;
+      }
+
+      .map {
+        position: absolute;
+        left: 20%;
+        width: 80%;
+        top: 0;
+        bottom: 0;
+      }
+
+      h1 {
+        font-family: 'Georgia';
+        font-size: 27px;
+        font-weight: bold;
+        margin: 0;
+        font-weight: 700;
+        line-height: 30px;
+        padding: 20px 2px;
+      }
+
+      h4{
+          font-family:'Helvetica', sans-serif;
+          font-size: 17px;
+          font: weight 900;
+          line-height: 20px;
+          margin:0;
+      }
+
+      a {
+        color: #404040;
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: #101010;
+      }
+
+      .description {
+        position: absolute;
+        background-color: #fff;
+        margin-top: 130px;
+        font: 14px/13px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        padding: 10px;
+        left: 10px;
+        width: 18%;
+        line-height: 15px;
+
+      }
+
+      .button {
+        position: relative;
+        margin-top:5px;
+        background-color:#93c6b9;
+	      border-radius:25px;
+        border-color:aquamarine;
+	      display:inline-block;
+	      cursor:pointer;
+	      color:#fff;
+	      font-family:'Helvetica Neue', Arial, Helvetica, sans-serif;
+	      font-size:17px;
+	      padding:5px 10px;
+	      text-decoration:none;
+        margin-left:20px;
+      }
+
+      .button:hover {
+	      background-color:#cacbcc;
+      }
+      .button:active {
+	      position:relative;
+	      top:1px;
+      }
+      
+
+      /* legend style */
+      .legend {
+        background-color: #fff;
+        border-radius: 5px;
+        bottom: 35px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        font: 14px/15px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        padding: 20px;
+        position: absolute;
+        left: 20px;
+        width: 15%;
+        z-index: 1;
+        line-height: 20px;
+      }
+ 
+      .legend h4 {
+        margin: 0 0 10px;
+      }
+ 
+      .legend div span {
+        position: relative;
+        border-radius: 50%;
+        display: inline-block;
+        height: 10px;
+        width: 10px;
+      }
+
+      .heading {
+        background: #fff;
+        border-bottom: 1px solid #eee;
+        min-height: 60px;
+        line-height: 60px;
+        padding: 0 10px;
+        background-color:#39393b;
+        color: #fff;
+        font-size: 2px;
+        font-weight: bold;
+        
+      }
+
+      /* Marker tweaks */
+      .mapboxgl-popup {
+        padding-bottom: 50px;
+      }
+
+      .mapboxgl-popup-close-button {
+        display: none;
+      }
+      .mapboxgl-popup-content {
+        font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+        padding: 0;
+        width: 180px;
+      }
+      .mapboxgl-popup-content-wrapper {
+        padding: 1%;
+      }
+      .mapboxgl-popup-content h3 {
+        background: #8f9193;
+        color: #fff;
+        margin: 0;
+        display: block;
+        padding: 10px;
+        border-radius: 3px 3px 0 0;
+        font-weight: 700;
+        margin-top: -15px;
+      }
+
+      .mapboxgl-popup-content h4 {
+        margin: 0;
+        display: block;
+        padding: 10px 10px 10px 10px;
+        font-weight: 400;
+      }
+
+      .mapboxgl-popup-content p {
+        margin: 0;
+        display: block;
+        padding: 0px 10px 10px 10px;
+        font-weight: 350;
+        font-size: 14px;
+      }
+
+
+      .mapboxgl-popup-content div {
+        padding: 10px;
+      }
+
+      .mapboxgl-container .leaflet-marker-icon {
+        cursor: pointer;
+      }
+
+      .mapboxgl-popup-anchor-top > .mapboxgl-popup-content {
+        margin-top: 15px;
+      }
+
+      .mapboxgl-popup-anchor-top > .mapboxgl-popup-tip {
+        border-bottom-color: #91c949;
+      }
+  </style>
+</head>
+
+
+
+<body>
+  <body>
+
+    <!-- create the left sidebar -->
+    <div class="sidebar">
+      <div class="heading">
+        <h1>Healthy Food Locator in South Bronx</h1>
+      </div>
+    
+      </div>
+  
+      <!-- <div id="listings" class="listings"></div> -->
+    </div>
+
+    <!-- website description -->
+    <div id="description" class="description">
+        <h4>Please enter an address in the top-left corner to initiate the search! </h4>
+      <p>
+        This healthy food locator is intended for local residents to tract every available food option in South Bronx.
+      </p>
+      <p>
+        Upon entering the address, the map will show all food stores within the radius of a quarter of mile with pop-up of detail information such as store types and name as you hover over. The color gradient is an indicator of “healthy score” ranging from red, the least healthy to green, the most nutritious. 
+      </p>
+      <p>
+        Please refer to the legend below for further categorization.
+      </p>
+    </div>
+    
+
+    <!-- store legends -->
+    <div id="store-legend" class="legend">
+      <h4>Store Types</h4>
+      <div><span style="background-color: #2f68d3"></span>Supermarket</div>
+      <div><span style="background-color: #7f8cfc"></span>Restaurant</div>
+      <div><span style="background-color: #26dbdb"></span>Speciality Food Store</div>
+      <div><span style="background-color: #53df92"></span>Small Grocery Store</div>
+      <div><span style="background-color: #e6b926"></span>Relief Services</div>
+      <div><span style="background-color: #ed8700"></span>Snack</div>
+      <div><span style="background-color: #ff008c"></span>Fastfood</div>
+      <div><span style="background-color: #bf00ef"></span>Convenience Store</div>
+    </div>
+
+
+    <div id="map" class="map"></div>
+
+
+  <script>
+
+    // set access token
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZXN0aGVyc2hpMjAyMCIsImEiOiJjazlyb29maGwwd3UxM21xeHhqam0xNmN2In0.EbCOLlx9MUMrUAU2h8WtJw'; // set the access token
+
+    // draw the map
+    var map = new mapboxgl.Map({
+      container: 'map', // The container ID
+      style: 'mapbox://styles/esthershi2020/cka0ka3wt18291inqi9cy6r71', // The map style to use
+      center: [-73.87178, 40.85897], // Starting position [lng, lat]
+      zoom: 12 // Starting zoom level
+    });
+
+    // search for the address
+    map.on('load', function() {
+        var geocoder = new MapboxGeocoder({
+          accessToken: mapboxgl.accessToken,
+          mapboxgl: mapboxgl,
+          zoom: 13,
+          placeholder: 'Enter an address or place name',
+          bbox: [-74.06378, 40.74733, -73.4618, 41.141]
+        });
+
+        map.addControl(geocoder, 'top-left');
+
+
+        //set the locator marker
+        var marker = new mapboxgl.Marker({
+          'color': '#ec5e26'
+        });
+
+        geocoder.on('result', function(data, e) {
+          var point = data.result.center;
+          var tileset = 'esthershi2020.6ad92g63';
+          var radius = 16090;
+          var limit = 50;
+          var query =
+            'https://api.mapbox.com/v4/' +
+            tileset +
+            '/tilequery/' +
+            point[0] +
+            ',' +
+            point[1] +
+            '.json?radius=' +
+            radius +
+            '&limit= ' +
+            limit +
+            ' &access_token=' +
+            mapboxgl.accessToken;
+
+          marker.setLngLat(point).addTo(map);
+
+          $.ajax({
+            method: 'GET',
+            url: query
+          }).done(function(resp) {
+            map.getSource('tilequery').setData(resp);
+          });
+        });
+
+        map.addSource('tilequery', {
+          type: 'geojson',
+          data: {
+            'type': 'FeatureCollection',
+            'features': []
+          }
+        });
+
+
+        map.addLayer({
+          id: 'tilequery-points',
+          type: 'circle',
+          source: 'tilequery',
+          paint: {
+            'circle-stroke-color': 'white',
+            'circle-stroke-width': {
+              stops: [
+                [0, 0.1],
+                [18, 3]
+              ],
+              base: 5
+            },
+            'circle-radius': {
+              stops: [
+                [12, 5],
+                [22, 180]
+              ],
+              base: 5
+            },
+            'circle-color': [
+              'match',
+              ['get', 'STORE_TYPE'],
+              'Convenience Store',
+              '#bf00ef',
+              'Supermarket',
+              '#2f68d3',
+              'Specialty Food Store',
+              '#26dbdb',
+              'Small Grocery Store',
+              '#53df92',
+              'Relief Services',
+              '#e6b926',
+              'Fast Food',
+              '#ff008c',
+              'Snack',
+              '#ed8700',
+              '#7f8cfc' // any other store type
+            ],
+
+            'circle-opacity': 0.7
+
+
+          }
+        });
+
+        var popup = new mapboxgl.Popup();
+
+        map.on('mouseenter', 'tilequery-points', function(e) {
+          map.getCanvas().style.cursor = 'pointer';
+
+          var title = '<h3>' + e.features[0].properties.STORE_NAME + '</h3>';
+          var storeType =
+            '<h4>' + e.features[0].properties.STORE_TYPE + '</h4>';
+          var storeAddress =
+            '<p>' + e.features[0].properties.ADDRESS_LINE1 + '</p>';
+          var obj = JSON.parse(e.features[0].properties.tilequery);
+          var distance =
+            '<p>' +
+            (obj.distance / 1609.344).toFixed(2) +
+            ' mi. from location' +
+            '</p>';
+
+          var lon = e.features[0].properties.longitude;
+          var lat = e.features[0].properties.latitude;
+          var coordinates = new mapboxgl.LngLat(lon, lat);
+          var content = title + storeType + storeAddress + distance;
+
+          popup
+            .setLngLat(coordinates)
+            .setHTML(content)
+            .addTo(map);
+        });
+
+        map.on('mouseleave', 'tilequery-points', function() {
+          map.getCanvas().style.cursor = '';
+          popup.remove();
+        });
+      });
+
+
+
+
+      //draw circle with a radius and set it to be on click
+      var createGeoJSONCircle = function(center, radiusInKm, points) {
+      if(!points) points = 64;
+
+      var coords = {
+        latitude: center[1],
+        longitude: center[0]
+      };
+
+      var km = radiusInKm;
+
+      var ret = [];
+      var distanceX = km/(111.320*Math.cos(coords.latitude*Math.PI/180));
+      var distanceY = km/110.574;
+
+      var theta, x, y;
+      for(var i=0; i<points; i++) {
+        theta = (i/points)*(2*Math.PI);
+        x = distanceX*Math.cos(theta);
+        y = distanceY*Math.sin(theta);
+
+        ret.push([coords.longitude+x, coords.latitude+y]);
+      }
+      ret.push(ret[0]);
+
+      return {
+        "type": "geojson",
+        "data": {
+            "type": "FeatureCollection",
+            "features": [{
+                "type": "Feature",
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [ret]
+                }
+            }]
+        }
+      };
+};
+
+      map.on("click", function(e){
+            console.log("background click", e.lngLat);
+
+            if (map.getLayer("radius")){
+            map.removeLayer("radius");
+            }
+
+            if (map.getSource("radius")){
+            map.removeSource("radius");
+            }
+
+            map.addSource("radius", createGeoJSONCircle([e.lngLat.lng, e.lngLat.lat], 0.5));
+
+            map.addLayer({
+                "id": "radius",
+                "type": "fill",
+                "source": "radius",
+                "layout": {},
+                "paint": {
+                    "fill-color": "white",
+                    "fill-opacity": 0.3
+                }
+            });
+        });
+
+  </script>
+
+</body>
+
+</html>
