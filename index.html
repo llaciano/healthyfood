@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.css' rel='stylesheet' />
+   
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.2.0/mapbox-gl-geocoder.min.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.2.0/mapbox-gl-geocoder.css' type='text/css' />
+
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.css' rel='stylesheet' />
+  <link href='https://fonts.googleapis.com/css?family=Merriweather' rel='stylesheet'>
+  <!-- Import jQuery -->
+  <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
+   
+   <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+        height:100%;
+      }
+
+      h1{
+        font-family:'Georgia';
+        font-size: 27px;
+        margin: 0;
+        color: #ffffff;
+        font-weight: 700;
+        line-height: 35px;
+        padding: 20px 2px;
+      }
+
+      h2{
+        font-family:'Helvetica', sans-serif;
+        font-size: 20px;
+        font-weight: bold;
+        margin: 0;
+        color: #ffffff;
+        font-weight: 400;
+        line-height: 40px;
+        padding: 20px 2px;
+      }
+
+      p{
+        font-family:'Helvetica', sans-serif;
+        font-size: 14px;
+        margin: 0;
+        color: #ffffff;
+        font-weight: 300;
+        line-height: 15px;
+        padding: 20px 10px;
+        text-indent: 20px;
+      }
+
+      #floating-panel {
+        position: absolute;
+        width:20%;
+        height: 100%;
+        z-index: 5;
+        background-color:rgba(168, 201, 204, 0.7);
+        padding: 5px;
+        text-align: left;
+        /* font-family: 'Roboto','sans-serif';
+        font-size:30px; */
+        line-height: 50px;
+        padding-left: 10px;
+      }
+
+      .button {
+        transition-duration: 0.4s;
+        border:2px, solid, #A6BDDB;
+        font-family:'Helvetica Neue', Helvetica, sans-serif;
+	      font-size:17px;
+        text-align:center;
+        text-decoration: none;
+        padding: 5px 16px;
+        cursor: pointer;
+        background-color: #A6BDDB;
+        color: rgb(64, 71, 136);
+        margin: 4px 2px;
+        display: inline-block;
+        border-radius: 15px;
+      }
+
+      .button:hover{
+        background: white;
+        color:#85AFDD;
+      }
+
+    </style>
+</head>
+<body>
+
+  <div id="floating-panel">
+    <h1>South Bronx Food Heat Map</h1>
+    <p>
+        According to 2019 city council report, estimated 1.09 million New Yorkers are in some sort of "food insecure state”, meaning that they had difficulty at some time during the year accessing enough food. 
+    While approximately 20% of New Yorker rely on SNAP, also known as food stamps, a form of federal monthly nutrition assistance to buy healthy food, the numbers and experience vary from district to district. South Bronx, where the majority of residents are low-income and people of color, are the most vulnerable. About 20% of the population in this community responded that they did not have access to fruits or vegetable on a prior day. 
+    </p>
+    <p>
+        SOUTH BRONX HEAT MAP of GROCERY STORES teases out spatial patterns and gaps within our current fresh produce network. The visual analysis of food desert will raise awareness and attention to the most vulnerable spots within the community of South Bronx which suffers from health disparity. 
+    </p>
+    <p>
+        Furthermore, this map will provide contextual guideline for promoting zoning-based policies such as FRESH (The Food Retail Expansion to Support Health) to further expand tax incentives for healthy and affordable food options.
+    </p>
+    <a href="foodLocator.html">
+      <button id="food locator" class="button">Go to the FOOD LOCATOR!</button>
+    </a>
+  </div>
+
+
+  <div id='map'></div>
+  <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZXN0aGVyc2hpMjAyMCIsImEiOiJjazlyb29maGwwd3UxM21xeHhqam0xNmN2In0.EbCOLlx9MUMrUAU2h8WtJw';
+    var map = new mapboxgl.Map({
+      container: 'map', // The container ID
+      style: 'mapbox://styles/mapbox/dark-v10', // The map style to use
+      center: [-73.87178, 40.85897],
+        zoom: 11
+    });
+
+
+
+    
+map.on('load', function() {
+    map.addSource('trees', {
+  type: 'geojson',
+  data: 'https://raw.githubusercontent.com/llaciano/bigdata2020data/master/merge_.geojson'
+});
+// add heatmap layer here
+map.addLayer({
+  id: 'trees-heat',
+  type: 'heatmap',
+  source: 'trees',
+  maxzoom: 15,
+  paint: {
+    // increase weight as diameter breast height increases
+    'heatmap-weight': {
+      property: 'SALESVOL',
+      type: 'exponential',
+      stops: [
+        [1, 0],
+        [62, 1]
+      ]
+    },
+    // increase intensity as zoom level increases
+    'heatmap-intensity': {
+      stops: [
+        [11, 1],
+        [15, 3]
+      ]
+    },
+    // assign color values be applied to points depending on their density
+    'heatmap-color': [
+      'interpolate',
+      ['linear'],
+      ['heatmap-density'],
+      0, 'rgba(236,222,239,0)',
+      0.2, 'rgb(208,209,230)',
+      0.4, 'rgb(166,189,219)',
+      0.6, 'rgb(103,169,207)',
+      0.8, 'rgb(38,200,237)'
+    ],
+    // increase radius as zoom increases
+    'heatmap-radius': {
+      stops: [
+        [11, 15],
+        [15, 20]
+      ]
+    },
+    // decrease opacity to transition into the circle layer
+    'heatmap-opacity': {
+      default: 1,
+      stops: [
+        [14, 1],
+        [15, 0]
+      ]
+    },
+  }
+}, 'waterway-label');
+// add circle layer here
+map.addLayer({
+  id: 'trees-point',
+  type: 'circle',
+  source: 'trees',
+  minzoom: 14,
+  paint: {
+    // increase the radius of the circle as the zoom level and dbh value increases
+    'circle-radius': {
+      property: 'dbh',
+      type: 'exponential',
+      stops: [
+        [{ zoom: 15, value: 1 }, 5],
+        [{ zoom: 15, value: 62 }, 10],
+        [{ zoom: 22, value: 1 }, 20],
+        [{ zoom: 22, value: 62 }, 50],
+      ]
+    },
+    'circle-color': {
+      property: 'dbh',
+      type: 'exponential',
+      stops: [
+        [0, 'rgba(236,222,239,0)'],
+        [10, 'rgb(236,222,239)'],
+        [20, 'rgb(208,209,230)'],
+        [30, 'rgb(166,189,219)'],
+        [40, 'rgb(103,169,207)'],
+        [50, 'rgb(28,144,153)'],
+        [60, 'rgb(1,108,89)']
+      ]
+    },
+    'circle-stroke-color': 'white',
+    'circle-stroke-width': 1,
+    'circle-opacity': {
+      stops: [
+        [14, 0],
+        [15, 1]
+      ]
+    }
+  }
+}, 'waterway-label');
+});
+
+ //click on tree to view dbh in a popup
+ map.on('click', 'trees-point', function(e) {
+        new mapboxgl.Popup()
+          .setLngLat(e.features[0].geometry.coordinates)
+          .setHTML('<b>NAME:</b> ' + e.features[0].properties.Name)
+          .addTo(map);
+      });
+
+
+
+  </script>
+</body>
+</html>
