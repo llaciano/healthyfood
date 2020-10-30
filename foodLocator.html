@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html>
 
+<!-- 20/10/30 updates: changed sidebar to the top to optimize mobile view; 
+legend location changed from left to right; 
+description scroll not working well :( -->
+
 <head>
   <meta charset='utf-8' />
   <title>Healthy food finder</title>
-  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <meta name='viewport' content="width=device-width, initial-scale=1.0" />
   <!-- Import Mapbox GL JS -->
 
     <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.2.0/mapbox-gl-geocoder.min.js'></script>
@@ -14,6 +18,7 @@
   <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.css' rel='stylesheet' />
   <!-- Import jQuery -->
   <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
+  
   <style>
     body {
         color: #404040;
@@ -29,14 +34,32 @@
         box-sizing: border-box;
       }
 
-      .sidebar {
-        position: absolute;
-        width: 20%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        overflow: hidden;
-        border-right: 1px solid rgba(0, 0, 0, 0.25);
+
+      .topHeader {
+          position: relative;
+          width: 100%;
+          height: 25%;
+          overflow: auto;
+          top: 0;
+          left: 0;
+      }
+
+      .topHeader_title {
+          border: whitesmoke;
+          width: 100%;
+          float: left;
+          padding: 10px;
+          background-color: #404040;
+      }
+
+      .topHeader_descrip {
+          width: 100%;
+          max-height: calc(100vh - 30px - 40px - 40px);
+          float: left;
+          padding: 10px;
+          background-color: white;
+          font: 12px/11px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+          overflow-y: scroll;
       }
 
       .pad2 {
@@ -45,9 +68,8 @@
 
       .map {
         position: absolute;
-        left: 20%;
-        width: 80%;
-        top: 0;
+        width: 100%;
+        top: 25%;
         bottom: 0;
       }
 
@@ -59,13 +81,14 @@
         font-weight: 700;
         line-height: 30px;
         padding: 20px 2px;
+        color: white;
       }
 
       h4{
           font-family:'Helvetica', sans-serif;
-          font-size: 17px;
+          font-size: 14px;
           font: weight 900;
-          line-height: 20px;
+          line-height: 15px;
           margin:0;
       }
 
@@ -79,23 +102,25 @@
       }
 
       .description {
-        position: absolute;
-        background-color: #fff;
-        margin-top: 130px;
-        font: 14px/13px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-        padding: 10px;
+        position: relative;
+        width: 100%;
+        height: 30%;
+        background-color: rgba(255, 255, 255, 0.6);
+        /*margin-top: 20%;*/
+        font: 12px/11px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        padding: 5px;
         left: 10px;
-        width: 18%;
-        line-height: 15px;
-
-      }
+        right: 10px;
+        /* line-height: 15px; */
+        overflow: auto;
+        }
 
       .button {
         position: relative;
         margin-top:5px;
         background-color:#93c6b9;
 	      border-radius:25px;
-        border-color:aquamarine;
+          border-color:aquamarine;
 	      display:inline-block;
 	      cursor:pointer;
 	      color:#fff;
@@ -117,42 +142,29 @@
 
       /* legend style */
       .legend {
-        background-color: #fff;
+        background-color: rgba(255, 255, 255, 0.692);
         border-radius: 5px;
-        bottom: 35px;
+        bottom: 5px;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        font: 14px/15px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-        padding: 20px;
+        font: 11px/12px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        padding: 10px;
         position: absolute;
-        left: 20px;
-        width: 15%;
+        right: 20px;
+        width: 25%;
         z-index: 1;
         line-height: 20px;
       }
  
       .legend h4 {
-        margin: 0 0 10px;
+        margin: 0 0 5px;
       }
  
       .legend div span {
-        position: relative;
+        /* position: relative; */
         border-radius: 50%;
         display: inline-block;
-        height: 10px;
-        width: 10px;
-      }
-
-      .heading {
-        background: #fff;
-        border-bottom: 1px solid #eee;
-        min-height: 60px;
-        line-height: 60px;
-        padding: 0 10px;
-        background-color:#39393b;
-        color: #fff;
-        font-size: 2px;
-        font-weight: bold;
-        
+        height: 8px;
+        width: 8px;
       }
 
       /* Marker tweaks */
@@ -176,25 +188,25 @@
         color: #fff;
         margin: 0;
         display: block;
-        padding: 10px;
+        padding: 5px;
         border-radius: 3px 3px 0 0;
-        font-weight: 700;
         margin-top: -15px;
       }
 
       .mapboxgl-popup-content h4 {
         margin: 0;
         display: block;
-        padding: 10px 10px 10px 10px;
+        padding: 10px 5px 5px 5px;
         font-weight: 400;
       }
 
       .mapboxgl-popup-content p {
         margin: 0;
         display: block;
-        padding: 0px 10px 10px 10px;
+        padding: 0px 5px 10px 5px;
         font-weight: 350;
-        font-size: 14px;
+        font-size: 12px;
+        line-height: 80%;
       }
 
 
@@ -207,7 +219,7 @@
       }
 
       .mapboxgl-popup-anchor-top > .mapboxgl-popup-content {
-        margin-top: 15px;
+        margin-top: 10px;
       }
 
       .mapboxgl-popup-anchor-top > .mapboxgl-popup-tip {
@@ -221,46 +233,43 @@
 <body>
   <body>
 
-    <!-- create the left sidebar -->
-    <div class="sidebar">
-      <div class="heading">
+    <!-- create the top section of header and description -->
+    <div class="topHeader">
+      <div class="topHeader_title">
         <h1>Healthy Food Locator in South Bronx</h1>
       </div>
-    
+      
+      <div class="topHeader_descrip">
+        <h4>Please enter an address in the top-left of the map to initiate the search! </h4>
+        <p>
+            This healthy food locator is intended for local residents to tract every available food option in South Bronx.
+        </p>
+        <p>
+            Upon entering the address, the map will show all food stores within the radius of a quarter of mile with pop-up of detail information such as store types and name as you hover over. The color gradient is an indicator of “healthy score” ranging from red, the least healthy to green, the most nutritious. 
+        </p>
+        <p>
+            Please refer to the legend below for further categorization.
+        </p>
       </div>
-  
-      <!-- <div id="listings" class="listings"></div> -->
-    </div>
 
-    <!-- website description -->
-    <div id="description" class="description">
-        <h4>Please enter an address in the top-left corner to initiate the search! </h4>
-      <p>
-        This healthy food locator is intended for local residents to track every available food option in the South Bronx.
-      </p>
-      <p>
-        Upon entering the address, the map will show all food stores within a radius of a quarter of mile with a pop-up of detail information including the store type and name as you hover over. The color gradient is an indicator of a “healthy score” ranging from red, the least healthy, to green, the most nutritious. 
-      </p>
-      <p>
-        Please refer to the legend below for further categorization.
-      </p>
     </div>
     
 
     <!-- store legends -->
     <div id="store-legend" class="legend">
       <h4>Store Types</h4>
-      <div><span style="background-color: #2f68d3"></span>Supermarket</div>
-      <div><span style="background-color: #7f8cfc"></span>Restaurant</div>
-      <div><span style="background-color: #26dbdb"></span>Speciality Food Store</div>
-      <div><span style="background-color: #53df92"></span>Small Grocery Store</div>
-      <div><span style="background-color: #e6b926"></span>Relief Services</div>
-      <div><span style="background-color: #ed8700"></span>Snack</div>
-      <div><span style="background-color: #ff008c"></span>Fastfood</div>
-      <div><span style="background-color: #bf00ef"></span>Convenience Store</div>
+      <div><span style="background-color: #2f68d3"></span> Supermarket</div> 
+      <div><span style="background-color: #7f8cfc"></span> Restaurant</div>
+      <div><span style="background-color: #26dbdb"></span> Speciality Food Store</div>
+      <div><span style="background-color: #53df92"></span> Small Grocery Store</div>
+      <div><span style="background-color: #e6b926"></span> Relief Services</div>
+      <div><span style="background-color: #ed8700"></span> Snack</div>
+      <div><span style="background-color: #ff008c"></span> Fastfood</div>
+      <div><span style="background-color: #bf00ef"></span> Convenience Store</div>
     </div>
 
 
+    <!-- display the map -->
     <div id="map" class="map"></div>
 
 
